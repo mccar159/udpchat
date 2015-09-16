@@ -1,0 +1,76 @@
+/**
+*	UDP Server Program
+*	Listens on a UDP port
+*	Receives messages from each client and transmit the messages to the other client
+*	Displays the messages from both clients on the ChatServer screen
+*	"Goodbye" message will terminate the session
+*
+*	@author: Connor McCarl
+@	version: 2.0
+*/
+
+import java.io.*;
+import java.net.*;
+
+class UDPServer {
+	
+  public static void main(String args[]) throws Exception
+    {
+    DatagramSocket serverSocket = null;
+	int port = 0;
+	  
+	try
+		{
+			serverSocket = new DatagramSocket(9876);
+		}
+	
+	catch(Exception e)
+		{
+			System.out.println("Failed to open UDP socket");
+			System.exit(0);
+		}
+
+	InetAddress IPAddress = null;
+	InetAddress IPAddress2 = null;
+		
+      byte[] receiveData = new byte[1024];
+      byte[] sendData  = new byte[1024];
+	  
+	  byte[] receiveData = new byte[1024];
+	  byte[] sendData2 = new byte[1024];
+	  
+      while(true)
+        {
+		
+          DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+		  
+		  if(IPAddress == null){
+			  IPAddress = receivePacket.getAddress();
+		  } else {
+			  IPAddress2 = receivePacket.getAddress();
+		  }
+		  
+          serverSocket.receive(receivePacket);
+		  
+          String sentence = new String(receivePacket.getData());
+
+         // InetAddress IPAddress = receivePacket.getAddress();
+
+          port = receivePacket.getPort();
+
+          //String capitalizedSentence = sentence.toUpperCase();
+
+          sendData = sentence.getBytes();
+		
+		if(receivePacket.getAddress == IPAddress) //checks which IP address and sends accordingly
+		{
+			sendData = "Red: " + sendData;
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+		}else{
+			sendData = "Blue: " + sendData;
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress2, port);
+		}
+          serverSocket.send(sendPacket);
+        }
+    }
+}

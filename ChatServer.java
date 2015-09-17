@@ -17,7 +17,8 @@ class UDPServer {
   public static void main(String args[]) throws Exception
     {
     DatagramSocket serverSocket = null;
-	int port = 0;
+	int redPort = 0;
+	int bluePort = 0;
 	  
 	try
 		{
@@ -29,48 +30,80 @@ class UDPServer {
 			System.out.println("Failed to open UDP socket");
 			System.exit(0);
 		}
-
-	InetAddress IPAddress = null;
-	InetAddress IPAddress2 = null;
+		
+		InetAddress redIP = null;
+		InetAddress blueIP = null;
+		
+		
 		
       byte[] receiveData = new byte[1024];
       byte[] sendData  = new byte[1024];
 	  
-	  byte[] receiveData = new byte[1024];
-	  byte[] sendData2 = new byte[1024];
-	  
       while(true)
         {
-		
-          DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-		  
-		  if(IPAddress == null){
-			  IPAddress = receivePacket.getAddress();
-		  } else {
-			  IPAddress2 = receivePacket.getAddress();
-		  }
-		  
+          DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);	 
           serverSocket.receive(receivePacket);
 		  
-          String sentence = new String(receivePacket.getData());
-
-         // InetAddress IPAddress = receivePacket.getAddress();
-
-          port = receivePacket.getPort();
-
-          //String capitalizedSentence = sentence.toUpperCase();
-
-          sendData = sentence.getBytes();
-		
-		if(receivePacket.getAddress == IPAddress) //checks which IP address and sends accordingly
-		{
-			sendData = "Red: " + sendData;
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-		}else{
-			sendData = "Blue: " + sendData;
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress2, port);
+		  String sentence = null;
+		  
+		  		  
+		  if(red == null || blue == null){
+			if(red != receivePacket.getAddress() && red != null) {
+				//second client - store IP address
+				blueIP = receivePacket.getAddress();
+				bluePort = receivePacket.getPort();
+				sentence = "200";
+				sendData = sentence.getBytes();
+				
+				//notify second client there are two people in chat
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, blueIP, bluePort);
+				serverSocket.send(sendPacket);
+				
+				//notify first client that second client has entered
+				sendPacket = sendPacket = new DatagramPacket(sendData, sendData.length, redIP, redPort);
+				serverSocket.send(sendPacket);
+			} else {
+				//first client - store IP address or keeps sending 100 code if first client keeps sending stuff
+			  redIP = receivePacket.getAddress();
+			  redPort = receivePacket.getPort();
+			  sentence = "100";
+			  sendData = sentence.getBytes();
+			  
+			  DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, redIP, redPort);
+			  serverSocket.send(sendPacket);
+			}
+		  } else{ //both clients are active and chatting
+			  sentence = new String(receivePacket.getData());
+			  sendData = sentence.getBytes();
+			
+				if(sentence.equals("Goodbye")){
+					//send 400 code to both
+					//print end conversation on server screen
+					
+				}
+				//check who chatted
+				if(receivePacket.getAddress == redIP){
+					//print message on server screen Red:
+					//send 300 code to red
+					//send message to blue
+				} else{
+					//print message on server screen Blue:
+					//send 300 code to blue
+					//send message to red
+				}
 		}
-          serverSocket.send(sendPacket);
-        }
+		
+		  }
+		  
+		  
+          
+		  
+
+         
+
+          
+
+          
+
     }
 }
